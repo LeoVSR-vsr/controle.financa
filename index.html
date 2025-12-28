@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2c3e50">
-    <title>Meu Financeiro</title>
-    
+    <title>Meu Financeiro v9</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
@@ -16,134 +13,138 @@
             --red: #e74c3c; --blue: #3498db; --orange: #f39c12; --purple: #9b59b6; 
         }
 
-        /* Reset para Mobile */
         * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background: var(--bg); margin: 0; padding-bottom: 80px; color: #333; 
         }
 
-        /* Menu Inferior Estilo App */
+        /* Menu Inferior */
         nav { 
             background: var(--primary); display: flex; justify-content: space-around; 
-            position: fixed; bottom: 0; width: 100%; padding: 10px 0; 
-            z-index: 2000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
+            position: fixed; bottom: 0; width: 100%; padding: 12px 0; 
+            z-index: 2000; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); 
         }
-        nav button { 
-            background: none; color: white; border: none; font-size: 10px; 
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-        nav button i { font-size: 20px; display: block; margin-bottom: 2px; }
+        nav button { background: none; color: white; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.8; }
+        nav button.active-nav { opacity: 1; font-weight: bold; }
 
-        /* Termômetro e Resumo */
-        .header-app { background: white; padding: 15px; border-radius: 0 0 20px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .termometro-track { background: #eee; height: 12px; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        /* Cabeçalho e Termômetro */
+        .header-app { background: white; padding: 15px; border-radius: 0 0 20px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .termometro-track { background: #eee; height: 10px; border-radius: 10px; overflow: hidden; margin: 8px 0; }
         .termometro-bar { height: 100%; width: 0%; transition: 1s ease; }
         
+        /* Grid de Cards com Legenda */
         .resumo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .card { padding: 15px; border-radius: 15px; color: white; text-align: center; font-size: 14px; }
-        .full-card { grid-column: span 2; }
+        .card { padding: 12px; border-radius: 15px; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card span { font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; opacity: 0.9; }
+        .card strong { font-size: 15px; }
+        .full-card { grid-column: span 2; padding: 18px; }
+        .full-card strong { font-size: 22px; }
 
-        /* Seções */
         .secao { padding: 20px; display: none; }
-        .active { display: block; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Inputs Estilizados */
-        input, select { 
-            width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; 
-            border-radius: 12px; font-size: 16px; background: white; 
-        }
-        .btn-principal { 
-            background: var(--green); color: white; border: none; padding: 18px; 
-            width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 15px; 
-        }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; -webkit-appearance: none; }
+        .btn-principal { background: var(--green); color: white; border: none; padding: 16px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 10px; }
 
-        /* Lista de Transações */
-        .transacao-item { 
-            background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-        }
-        .badge { font-size: 10px; padding: 3px 8px; border-radius: 5px; background: #eee; color: #666; }
-
-        .meta-box { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; }
+        /* Itens da Lista */
+        .transacao-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid transparent; }
+        .item-receita { border-left-color: var(--green); }
+        .item-despesa { border-left-color: var(--red); }
+        .badge { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: #f0f0f0; color: #777; font-weight: bold; }
+        
+        .meta-box { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
     </style>
 </head>
 <body onload="iniciar()">
 
     <div class="header-app">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <small id="texto-saude" style="font-weight: bold;">Analisando...</small>
-            <input type="month" id="filtroMes" onchange="renderizarTudo()" style="width: auto; padding: 5px; margin: 0; border: none; font-weight: bold;">
+            <small id="texto-saude" style="font-weight: 800; color: var(--primary);">SAÚDE FINANCEIRA</small>
+            <input type="month" id="filtroMes" onchange="renderizarTudo()" style="width: auto; padding: 4px; margin: 0; border: none; font-weight: bold; background: #f0f0f0; border-radius: 8px;">
         </div>
         <div class="termometro-track"><div id="termometro-fill" class="termometro-bar"></div></div>
     </div>
 
     <div class="resumo">
-        <div class="card full-card" style="background: var(--orange)" id="card-real">Saldo Real: R$ 0,00</div>
-        <div class="card" style="background: var(--blue)" id="card-total">Saldo Total</div>
-        <div class="card" style="background: var(--purple)" id="card-metas">Em Metas</div>
-        <div class="card" style="background: var(--green)" id="card-receita">Ganhos</div>
-        <div class="card" style="background: var(--red)" id="card-despesa">Gastos</div>
+        <div class="card full-card" style="background: var(--orange)" id="card-real">
+            <span>Disponível (Saldo Real)</span>
+            <strong id="val-real">R$ 0,00</strong>
+        </div>
+        <div class="card" style="background: var(--blue)">
+            <span>Saldo Total</span>
+            <strong id="val-total">R$ 0,00</strong>
+        </div>
+        <div class="card" style="background: var(--purple)">
+            <span>Em Metas</span>
+            <strong id="val-metas">R$ 0,00</strong>
+        </div>
+        <div class="card" style="background: var(--green)">
+            <span>Ganhos (Mês)</span>
+            <strong id="val-receita">R$ 0,00</strong>
+        </div>
+        <div class="card" style="background: var(--red)">
+            <span>Gastos (Mês)</span>
+            <strong id="val-despesa">R$ 0,00</strong>
+        </div>
     </div>
 
     <section id="aba-extrato" class="secao active">
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <select id="filtroCat" onchange="renderizarTudo()" style="margin:0"><option value="">Todas Categorias</option></select>
-        </div>
+        <select id="filtroCat" onchange="renderizarTudo()" style="margin-bottom: 15px;"></select>
         <div id="corpo-lista"></div>
     </section>
 
     <section id="aba-novo" class="secao">
-        <h2>Novo Registro</h2>
+        <h3 style="margin-top:0">Novo Lançamento</h3>
         <select id="tipo"><option value="despesa">🔴 Despesa</option><option value="receita">🟢 Receita</option></select>
         <input type="date" id="data">
-        <input type="text" id="desc" placeholder="O que você comprou?">
+        <input type="text" id="desc" placeholder="Descrição">
         <input type="number" id="valor" placeholder="Valor R$">
         <select id="cat-select"></select>
-        <label style="display:flex; align-items:center; gap:10px; padding:10px;">
-            <input type="checkbox" id="fixo" style="width:auto"> Repetir mensalmente
+        <label style="display:flex; align-items:center; gap:10px; padding:15px; background: #fff; border-radius: 12px; margin-top: 10px;">
+            <input type="checkbox" id="fixo" style="width:auto"> Conta Fixa (Todo mês)
         </label>
-        <button class="btn-principal" onclick="salvarLancamento()">Salvar no App</button>
+        <button class="btn-principal" onclick="salvarLancamento()">SALVAR</button>
     </section>
 
     <section id="aba-metas" class="secao">
-        <h2>Metas de Poupança</h2>
-        <input type="text" id="m-nome" placeholder="Ex: Viagem, Carro">
-        <input type="number" id="m-alvo" placeholder="Valor Total Alvo">
-        <button class="btn-principal" onclick="criarMeta()">Criar Nova Meta</button>
+        <h3 style="margin-top:0">Metas e Objetivos</h3>
+        <input type="text" id="m-nome" placeholder="Nome da Meta">
+        <input type="number" id="m-alvo" placeholder="Valor Alvo R$">
+        <button class="btn-principal" onclick="criarMeta()" style="background: var(--purple)">CRIAR META</button>
         <div id="container-metas" style="margin-top: 20px;"></div>
     </section>
 
-    <section id="aba-config" class="secao">
-        <h2>Configurações</h2>
-        <div class="meta-box">
-            <h4>Categorias</h4>
-            <div style="display:flex; gap:5px">
-                <input type="text" id="nova-cat" placeholder="Nova Cat." style="margin:0">
-                <button onclick="adicionarCategoria()" style="background:var(--purple); color:white; border:none; border-radius:10px; padding:0 15px">Add</button>
-            </div>
-            <div id="lista-cats-config" style="margin-top:10px"></div>
-        </div>
-        <button onclick="resetTotal()" style="background:none; color:red; border:none; width:100%; padding:20px">🚫 Apagar todos os dados</button>
-    </section>
-
     <section id="aba-grafico" class="secao">
+        <h3>Distribuição de Gastos</h3>
         <canvas id="canvasGrafico"></canvas>
     </section>
 
-    <nav>
-        <button onclick="mudarAba('aba-extrato')"><i>📋</i>Extrato</button>
-        <button onclick="mudarAba('aba-novo')"><i>💰</i>Lançar</button>
-        <button onclick="mudarAba('aba-metas')"><i>🚀</i>Metas</button>
-        <button onclick="mudarAba('aba-grafico')"><i>📊</i>Gráfico</button>
-        <button onclick="mudarAba('aba-config')"><i>⚙️</i>Ajustes</button>
+    <section id="aba-config" class="secao">
+        <h3>Configurações</h3>
+        <div class="meta-box">
+            <h4>Gerenciar Categorias</h4>
+            <div style="display:flex; gap:5px">
+                <input type="text" id="nova-cat" placeholder="Nova Categoria" style="margin:0">
+                <button onclick="adicionarCategoria()" style="background:var(--primary); color:white; border:none; border-radius:10px; padding:0 15px">ADD</button>
+            </div>
+            <div id="lista-cats-config" style="margin-top:15px; display: flex; flex-wrap: wrap; gap: 5px;"></div>
+        </div>
+        <button onclick="resetTotal()" style="background:none; color:var(--red); border:2px solid var(--red); width:100%; padding:15px; border-radius: 12px; font-weight: bold; margin-top: 20px;">Zerar Todos os Dados</button>
+    </section>
+
+    <nav id="app-nav">
+        <button onclick="mudarAba('aba-extrato')" class="active-nav"><span>📋</span>Extrato</button>
+        <button onclick="mudarAba('aba-novo')"><span>💰</span>Lançar</button>
+        <button onclick="mudarAba('aba-metas')"><span>🚀</span>Metas</button>
+        <button onclick="mudarAba('aba-grafico')"><span>📊</span>Gráfico</button>
+        <button onclick="mudarAba('aba-config')"><span>⚙️</span>Ajustes</button>
     </nav>
 
     <script>
-        const DB_KEY = 'FINANCAS_MOBILE_V8';
-        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { transacoes: [], metas: [], categorias: ["Alimentação", "Moradia", "Transporte", "Lazer"] };
+        const DB_KEY = 'FINANCAS_MOBILE_V9';
+        let db = JSON.parse(localStorage.getItem(DB_KEY)) || { transacoes: [], metas: [], categorias: ["Alimentação", "Moradia", "Transporte", "Lazer", "Saúde"] };
 
         function iniciar() {
             const hoje = new Date();
@@ -155,7 +156,9 @@
 
         function mudarAba(id) {
             document.querySelectorAll('.secao').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('#app-nav button').forEach(b => b.classList.remove('active-nav'));
             document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active-nav');
             if(id === 'aba-grafico') desenharGrafico();
             window.scrollTo(0,0);
         }
@@ -163,8 +166,7 @@
         function salvarLancamento() {
             const desc = document.getElementById('desc').value;
             const valor = parseFloat(document.getElementById('valor').value);
-            if(!desc || !valor) return alert("Preencha os dados!");
-
+            if(!desc || isNaN(valor)) return alert("Preencha descrição e valor!");
             db.transacoes.push({
                 id: Date.now(),
                 tipo: document.getElementById('tipo').value,
@@ -189,34 +191,34 @@
             const totRec = db.transacoes.filter(t => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
             const totDes = db.transacoes.filter(t => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
             const emMetas = db.metas.reduce((s, m) => s + (m.atual || 0), 0);
-            
             const recMes = listaMes.filter(t => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
             const desMes = listaMes.filter(t => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
 
-            document.getElementById('card-real').innerText = `Saldo Real: R$ ${(totRec - totDes - emMetas).toFixed(2)}`;
-            document.getElementById('card-total').innerText = `R$ ${(totRec - totDes).toFixed(2)}`;
-            document.getElementById('card-metas').innerText = `R$ ${emMetas.toFixed(2)}`;
-            document.getElementById('card-receita').innerText = `+ R$ ${recMes.toFixed(2)}`;
-            document.getElementById('card-despesa').innerText = `- R$ ${desMes.toFixed(2)}`;
+            // Interface com Legendas
+            document.getElementById('val-real').innerText = `R$ ${(totRec - totDes - emMetas).toFixed(2)}`;
+            document.getElementById('val-total').innerText = `R$ ${(totRec - totDes).toFixed(2)}`;
+            document.getElementById('val-metas').innerText = `R$ ${emMetas.toFixed(2)}`;
+            document.getElementById('val-receita').innerText = `R$ ${recMes.toFixed(2)}`;
+            document.getElementById('val-despesa').innerText = `R$ ${desMes.toFixed(2)}`;
 
-            // Termômetro
+            // Saúde Financeira
             const pct = recMes > 0 ? (desMes / recMes) * 100 : (desMes > 0 ? 100 : 0);
             const fill = document.getElementById('termometro-fill');
             fill.style.width = Math.min(pct, 100) + '%';
             fill.style.background = pct < 70 ? 'var(--green)' : (pct <= 100 ? 'var(--orange)' : 'var(--red)');
-            document.getElementById('texto-saude').innerText = pct > 100 ? "No Vermelho! 🚨" : "Saúde: OK ✅";
+            document.getElementById('texto-saude').innerText = pct > 100 ? "NO VERMELHO! 🚨" : (pct > 70 ? "ATENÇÃO! ⚠️" : "SAÚDE EXCELENTE! ✅");
 
             document.getElementById('corpo-lista').innerHTML = listaMes.sort((a,b) => b.id - a.id).map(t => `
-                <div class="transacao-item">
+                <div class="transacao-item ${t.tipo==='receita'?'item-receita':'item-despesa'}">
                     <div>
                         <strong>${t.desc}</strong><br>
-                        <span class="badge">${t.categoria}</span> ${t.fixo?'<span class="badge" style="background:var(--purple);color:white">F</span>':''}
+                        <span class="badge">${t.categoria}</span> ${t.fixo?'<span class="badge" style="background:var(--purple);color:white">FIXO</span>':''}
                     </div>
                     <div style="text-align:right">
                         <span style="color:${t.tipo==='receita'?'var(--green)':'var(--red)'}; font-weight:bold">
                             ${t.tipo==='receita'?'+':'-'} R$ ${t.valor.toFixed(2)}
                         </span><br>
-                        <small onclick="removerT(${t.id})" style="color:#ccc">Remover</small>
+                        <small onclick="removerT(${t.id})" style="color:#bbb; font-size:10px">EXCLUIR</small>
                     </div>
                 </div>
             `).join('');
@@ -226,11 +228,12 @@
         function renderMetas() {
             document.getElementById('container-metas').innerHTML = db.metas.map(m => `
                 <div class="meta-box">
-                    <strong>${m.nome}</strong> <span style="float:right">R$ ${m.atual.toFixed(2)}</span>
-                    <div class="termometro-track"><div style="width:${(m.atual/m.alvo)*100}%; background:var(--blue); height:100%"></div></div>
-                    <div style="display:flex; gap:5px">
-                        <input type="number" id="in-${m.id}" placeholder="Somar R$" style="margin:0; flex:1">
-                        <button onclick="somarMeta(${m.id})" style="background:var(--green); color:white; border:none; border-radius:10px; padding:0 15px">+</button>
+                    <div style="display:flex; justify-content:space-between"><strong>${m.nome}</strong> <span>R$ ${m.atual.toFixed(2)}</span></div>
+                    <div class="termometro-track"><div style="width:${Math.min((m.atual/m.alvo)*100, 100)}%; background:var(--purple); height:100%"></div></div>
+                    <div style="display:flex; gap:8px">
+                        <input type="number" id="in-${m.id}" placeholder="Somar R$" style="margin:0; flex:1; padding:10px">
+                        <button onclick="somarMeta(${m.id})" style="background:var(--green); color:white; border:none; border-radius:10px; padding:0 20px; font-weight:bold">+</button>
+                        <button onclick="removerM(${m.id})" style="border:none; background:none; font-size:18px">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -255,24 +258,28 @@
             selects.forEach(sId => {
                 const s = document.getElementById(sId);
                 const val = s.value;
-                s.innerHTML = (sId === 'filtroCat' ? '<option value="">Categorias</option>' : '') + 
+                s.innerHTML = (sId === 'filtroCat' ? '<option value="">Filtrar Categoria</option>' : '') + 
                     db.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
                 s.value = val;
             });
-            document.getElementById('lista-cats-config').innerHTML = db.categorias.map(c => `<div class="badge" style="margin:2px">${c} <span onclick="removerCat('${c}')">x</span></div>`).join('');
+            document.getElementById('lista-cats-config').innerHTML = db.categorias.map(c => `
+                <div class="badge" style="padding:8px 12px; display:flex; align-items:center; gap:8px">
+                    ${c} <span onclick="removerCat('${c}')" style="color:var(--red); font-size:14px">×</span>
+                </div>`).join('');
         }
 
         function adicionarCategoria() {
-            const n = document.getElementById('nova-cat').value;
-            if(n) { db.categorias.push(n); salvar(); renderizarCategorias(); document.getElementById('nova-cat').value=''; }
+            const n = document.getElementById('nova-cat').value.trim();
+            if(n && !db.categorias.includes(n)) { db.categorias.push(n); salvar(); renderizarCategorias(); document.getElementById('nova-cat').value=''; }
         }
 
-        function removerCat(c) { db.categorias = db.categorias.filter(x => x !== c); salvar(); renderizarCategorias(); }
+        function removerCat(c) { if(confirm("Excluir categoria?")) { db.categorias = db.categorias.filter(x => x !== c); salvar(); renderizarCategorias(); } }
         function somarMeta(id) { const v = parseFloat(document.getElementById(`in-${id}`).value); if(v > 0) { db.metas.find(m => m.id === id).atual += v; salvar(); renderizarTudo(); } }
         function criarMeta() { const n = document.getElementById('m-nome').value; const a = parseFloat(document.getElementById('m-alvo').value); if(n && a) { db.metas.push({id:Date.now(), nome:n, alvo:a, atual:0}); salvar(); renderizarTudo(); } }
-        function removerT(id) { db.transacoes = db.transacoes.filter(t => t.id !== id); salvar(); renderizarTudo(); }
+        function removerT(id) { if(confirm("Excluir este lançamento?")) { db.transacoes = db.transacoes.filter(t => t.id !== id); salvar(); renderizarTudo(); } }
+        function removerM(id) { if(confirm("Excluir meta?")) { db.metas = db.metas.filter(m => m.id !== id); salvar(); renderizarTudo(); } }
         function salvar() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
-        function resetTotal() { if(confirm("Apagar tudo?")) { localStorage.clear(); location.reload(); } }
+        function resetTotal() { if(confirm("APAGAR TUDO? Esta ação é irreversível.")) { localStorage.clear(); location.reload(); } }
         
         function desenharGrafico() {
             const ctx = document.getElementById('canvasGrafico').getContext('2d');
@@ -281,7 +288,11 @@
             const totais = {};
             gastos.forEach(g => totais[g.categoria] = (totais[g.categoria] || 0) + g.valor);
             if(window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(totais), datasets: [{ data: Object.values(totais), backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f','#9b59b6'] }] } });
+            window.myChart = new Chart(ctx, { 
+                type: 'doughnut', 
+                data: { labels: Object.keys(totais), datasets: [{ data: Object.values(totais), backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f1c40f','#9b59b6','#e67e22'] }] },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
         }
     </script>
 </body>
